@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -11,6 +12,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using XD.COMMON;
+using XD.DATA;
+using XD.DATA.BaseRepository;
+using XD.DATA.EntityModels;
 
 namespace XD.API
 {
@@ -19,6 +24,7 @@ namespace XD.API
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            AppSettings.Init(configuration);
         }
 
         public IConfiguration Configuration { get; }
@@ -28,6 +34,9 @@ namespace XD.API
         {
 
             services.AddControllers();
+            services.AddDbContext<AppDbContext>(options => options.UseSqlServer(AppSettings.ConnectionString));
+            services.AddScoped<IRepository<User>, Repository<User>>();
+            services.AddScoped<UnitOfWork>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "XD.API", Version = "v1" });
